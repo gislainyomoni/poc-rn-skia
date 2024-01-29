@@ -1,9 +1,9 @@
-import { ReactElement } from 'react'
+import { ReactNode } from 'react'
 
 import { IChartProvider } from '../../lib/chart.context'
 
 export interface IChartContainerContentProps {
-  children?: ReactElement
+  children?: ReactNode
 }
 
 export interface IChartContainerProps

@@ -20,13 +20,14 @@ const ChartContainerContent = memo<IChartContainerContentProps>(({ children }) =
 })
 
 export const ChartContainer = memo<IChartContainerProps>(
-  ({ height, width, domain, px, py, children, formatTick }) => {
+  ({ height, width, domainY, domainX, px, py, children, formatTick }) => {
     return (
       <FiberProvider>
         <ChartProvider
           height={height}
           width={width}
-          domain={domain}
+          domainY={domainY}
+          domainX={domainX}
           px={px}
           py={py}
           formatTick={formatTick}

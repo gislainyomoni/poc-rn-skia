@@ -1,7 +1,18 @@
-import { ChartBars, ChartContainer, IChartBarsProps, IChartContainerProps } from './components'
+import {
+  ChartArea,
+  ChartBars,
+  ChartContainer,
+  ChartLine,
+  IChartBarsProps,
+  IChartContainerProps,
+  IChartLineProps,
+  IChartAreaProps,
+} from './components'
 
-export { IChartBarsProps, IChartContainerProps }
+export { IChartBarsProps, IChartContainerProps, IChartLineProps, IChartAreaProps }
 export const Chart = {
   Container: ChartContainer,
   Bars: ChartBars,
+  Line: ChartLine,
+  Area: ChartArea,
 }

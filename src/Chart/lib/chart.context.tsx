@@ -3,13 +3,15 @@ import { ScaleLinear, scaleLinear } from 'd3-scale'
 import { ReactElement, createContext, useContext } from 'react'
 import { Dimensions } from 'react-native'
 
-import { getTicks, xDomainHeight } from './chart.lib'
+import { getTicks, gridSpace, xDomainHeight } from './chart.lib'
 
 export type IChartContext = {
   width: number
   height: number
-  domain: number[]
+  domainY: number[]
   scaleY: ScaleLinear<number, number, never>
+  domainX: number[]
+  scaleX: ScaleLinear<number, number, never>
   px: number
   py: number
   font: SkFont
@@ -19,7 +21,7 @@ export type IChartContext = {
 }
 
 export interface IChartProvider
-  extends Pick<IChartContext, 'height' | 'domain'>,
+  extends Pick<IChartContext, 'height' | 'domainY' | 'domainX'>,
     Partial<Pick<IChartContext, 'px' | 'py' | 'width'>> {
   formatTick?: (tick: number) => string
   children: ReactElement
@@ -29,7 +31,8 @@ const ChartContext = createContext<IChartContext | undefined>(undefined)
 
 export const ChartProvider = ({
   children,
-  domain,
+  domainY,
+  domainX,
   height,
   px = 20,
   py = 10,
@@ -41,12 +44,17 @@ export const ChartProvider = ({
   if (!font || !boldFont) return null
 
   const scaleY = scaleLinear()
-    .domain(domain)
+    .domain(domainY)
     .range([height - py - xDomainHeight, py])
     .nice()
 
   const ticks = getTicks(scaleY, height, formatTick)
   const yDomainWidth = Math.max(...ticks.map(({ name }) => font.getTextWidth(name.toString())))
+
+  const scaleX = scaleLinear()
+    .domain(domainX)
+    .range([px + yDomainWidth + gridSpace, width - px])
+    .nice()
 
   return (
     <ChartContext.Provider
@@ -55,8 +63,10 @@ export const ChartProvider = ({
         width,
         font,
         boldFont,
-        domain,
+        domainY,
         scaleY,
+        domainX,
+        scaleX,
         ticks,
         px,
         py,
