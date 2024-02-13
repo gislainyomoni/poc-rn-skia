@@ -1,18 +1,26 @@
 import { SkFont, useFont } from '@shopify/react-native-skia'
-import { ScaleLinear, scaleLinear as d3ScaleLinear } from 'd3-scale'
+import { scaleLinear as d3ScaleLinear } from 'd3-scale'
 import { ReactElement, createContext, useCallback, useContext, useMemo } from 'react'
 import { Dimensions } from 'react-native'
 import { SharedValue, useSharedValue } from 'react-native-reanimated'
 
-import { getTicks, gridSpace, invertScaleLinear, scaleLinear, xDomainHeight } from './chart.lib'
+import {
+  Tuple,
+  getTicks,
+  gridSpace,
+  invertScaleLinear,
+  scaleLinear,
+  xDomainHeight,
+} from './chart.lib'
 
 export type IChartContext = {
   width: number
   height: number
-  domainY: [number, number]
-  scaleY: ScaleLinear<number, number, never>
-  rangeX: [number, number]
-  domainX: [number, number]
+  rangeY: Tuple
+  domainY: Tuple
+  scaleY: (y: number) => number
+  rangeX: Tuple
+  domainX: Tuple
   scaleX: (x: number) => number
   invertX: (x: number) => number
   px: number
@@ -35,7 +43,7 @@ const ChartContext = createContext<IChartContext | undefined>(undefined)
 
 export const ChartProvider = ({
   children,
-  domainY,
+  domainY: _domainY,
   domainX,
   height,
   px = 20,
@@ -46,17 +54,24 @@ export const ChartProvider = ({
   const font = useFont(require('./HKGrotesk-Regular.otf'), 10)
   const boldFont = useFont(require('./HKGrotesk-Bold.otf'), 12)
 
-  const scaleY = d3ScaleLinear()
-    .domain(domainY)
-    .range([height - py - xDomainHeight, py])
-    .nice()
+  const rangeY: Tuple = useMemo(() => [height - py, py + xDomainHeight], [height, py])
+  const d3ScaleY = d3ScaleLinear().domain(_domainY).range(rangeY).nice()
+  const domainY = d3ScaleY.domain() as Tuple
+  const ticks = getTicks(d3ScaleY, height, formatTick)
 
-  const ticks = getTicks(scaleY, height, formatTick)
+  const scaleY = useCallback(
+    (y: number) => {
+      'worklet'
+      return scaleLinear(y, domainY, rangeY)
+    },
+    [domainY, rangeY]
+  )
+
   const yDomainWidth = Math.max(
     ...ticks.map(({ name }) => font?.getTextWidth(name.toString()) ?? 0)
   )
 
-  const rangeX: [number, number] = useMemo(
+  const rangeX: Tuple = useMemo(
     () => [px + yDomainWidth + gridSpace, width - px],
     [px, width, yDomainWidth]
   )
@@ -86,6 +101,7 @@ export const ChartProvider = ({
         font,
         boldFont,
         domainY,
+        rangeY,
         scaleY,
         rangeX,
         domainX,

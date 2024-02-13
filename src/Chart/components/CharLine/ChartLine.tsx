@@ -1,4 +1,4 @@
-import { Skia, Path, Group, Circle } from '@shopify/react-native-skia'
+import { Skia, Path, Group, Circle, Mask, Rect } from '@shopify/react-native-skia'
 import { memo, useMemo } from 'react'
 import { useDerivedValue } from 'react-native-reanimated'
 
@@ -6,7 +6,7 @@ import { IChartLineProps } from './ChartLine.props'
 import { useChart } from '../../lib/chart.context'
 
 export const ChartLine = memo<IChartLineProps>(({ data }) => {
-  const { scaleY, scaleX, scrollX, invertX, domainX } = useChart()
+  const { scaleY, scaleX, scrollX, rangeX, rangeY } = useChart()
 
   const path = useMemo(() => {
     const result = Skia.Path.Make()
@@ -22,16 +22,29 @@ export const ChartLine = memo<IChartLineProps>(({ data }) => {
     return result
   }, [data, scaleX, scaleY])
 
-  const [minX, maxX] = domainX
-  const progress = useDerivedValue(
-    () => 1 - (invertX(scrollX.value) - maxX) / (minX - maxX),
-    [scrollX, invertX, maxX, minX]
-  )
+  const [maxY, minY] = rangeY
+  const [minX, maxX] = rangeX
+  const activeWidth = useDerivedValue(() => scrollX.value - minX)
+  const inactiveX = useDerivedValue(() => Math.max(scrollX.value, minX))
+  const inactiveWidth = useDerivedValue(() => maxX - inactiveX.value)
 
   return (
-    <Group strokeWidth={2} style="stroke">
-      <Path path={path} color="#1450B9" start={0} end={progress} />
-      <Path path={path} color="#1450B920" start={progress} end={1} />
+    <Group>
+      <Mask mask={<Path path={path} strokeWidth={2} style="stroke" />}>
+        <Group>
+          <Rect x={minX} y={minY} width={activeWidth} height={maxY - minY} color="#1450B9" />
+          <Rect
+            x={inactiveX}
+            y={minY}
+            width={inactiveWidth}
+            height={maxY - minY}
+            color="#1450B980"
+          />
+        </Group>
+      </Mask>
+      {data.map(({ x, y }, index) => (
+        <Circle key={index} r={4} cx={scaleX(x)} cy={scaleY(y)} color="black" style="fill" />
+      ))}
       <Circle r={10} cx={scrollX} cy={100} color="green" style="fill" />
     </Group>
   )
