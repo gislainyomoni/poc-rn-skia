@@ -23,16 +23,16 @@ export default function App() {
             ]}
             formatLabel={(value) => `${value > 0 ? '+' : ''}${value}°C`}
           /> */}
-          {/* <Chart.Line
+          <Chart.Line
             data={[
               { y: 17, x: 100 },
               { y: -11, x: 150 },
               { y: 22, x: 200 },
-              { y: -18, x: 270 },
+              { y: -18, x: 250 },
               { y: 10, x: 300 },
             ]}
-          /> */}
-          <Chart.Area
+          />
+          {/* <Chart.Area
             data={[
               { y1: 17, y2: 20, x: 100 },
               { y1: -11, y2: 5, x: 150 },
@@ -40,7 +40,7 @@ export default function App() {
               { y1: -18, y2: 0, x: 270 },
               { y1: 10, y2: 20, x: 300 },
             ]}
-          />
+          /> */}
         </Chart.Container>
       </View>
     </GestureHandlerRootView>

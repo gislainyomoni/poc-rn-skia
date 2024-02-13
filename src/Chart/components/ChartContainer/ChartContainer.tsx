@@ -1,21 +1,26 @@
 import { Canvas } from '@shopify/react-native-skia'
 import { FiberProvider, useContextBridge } from 'its-fine'
 import { memo } from 'react'
+import { GestureDetector } from 'react-native-gesture-handler'
 
 import { IChartContainerProps, IChartContainerContentProps } from './ChartContainer.props'
 import { ChartGrid } from './components'
 import { ChartProvider, useChart } from '../../lib/chart.context'
+import { useChartGesture } from '../../lib/chart.gesture'
 
 const ChartContainerContent = memo<IChartContainerContentProps>(({ children }) => {
   const { height, width } = useChart()
   const ContextBridge = useContextBridge()
+  const gesture = useChartGesture()
   return (
-    <Canvas style={{ height, width }}>
-      <ContextBridge>
-        <ChartGrid />
-        {children}
-      </ContextBridge>
-    </Canvas>
+    <GestureDetector gesture={gesture}>
+      <Canvas style={{ height, width }}>
+        <ContextBridge>
+          <ChartGrid />
+          {children}
+        </ContextBridge>
+      </Canvas>
+    </GestureDetector>
   )
 })
 
